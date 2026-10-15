@@ -1,0 +1,514 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#111827">
+  <title>Waiter Mirror — Order Companion</title>
+  <style>
+    :root {
+      --bg:#f4f6f8; --panel:#fff; --ink:#172033; --muted:#687386;
+      --line:#e2e7ee; --accent:#176b52; --accent-dark:#10533f;
+      --soft:#e8f4ef; --danger:#b42318; --warning:#fff4d6;
+      --shadow:0 5px 20px rgba(20,35,55,.06); --radius:16px;
+    }
+    * { box-sizing:border-box; }
+    html,body { margin:0; min-height:100%; background:var(--bg); color:var(--ink); font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
+    button,input,select,textarea { font:inherit; }
+    button { cursor:pointer; }
+    button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible { outline:3px solid #93c5fd; outline-offset:2px; }
+    .app { max-width:1440px; margin:auto; min-height:100dvh; display:flex; flex-direction:column; }
+    header { background:#111827; color:#fff; padding:14px 20px; display:flex; align-items:center; justify-content:space-between; gap:14px; position:sticky; top:0; z-index:10; box-shadow:0 4px 14px #11182720; }
+    .brand { display:flex; align-items:center; gap:11px; min-width:0; }
+    .logo { width:42px;height:42px;border-radius:13px;background:#d5f4e5;color:#155e45;display:grid;place-items:center;font-size:22px;font-weight:900;flex-shrink:0; }
+    h1 { font-size:18px; line-height:1.15; margin:0; letter-spacing:-.3px; }
+    .subhead { font-size:12px;color:#c4ccd8;margin-top:4px; }
+    .header-actions { display:flex; align-items:center; gap:8px; }
+    .pill { border:1px solid #465165;color:#e7edf5;border-radius:999px;padding:8px 11px;font-size:12px;white-space:nowrap; }
+    .layout { display:grid; grid-template-columns:minmax(0,1fr) 355px; gap:18px; padding:18px; align-items:start; flex:1; }
+    .main { min-width:0; }
+    .topline { display:flex; justify-content:space-between; align-items:center; gap:12px; margin:2px 0 14px; flex-wrap:wrap; }
+    .eyebrow { color:var(--muted);font-size:12px;font-weight:750;text-transform:uppercase;letter-spacing:.08em; }
+    .section-title { font-size:23px; letter-spacing:-.6px; margin:4px 0 0; }
+    .btn { border:1px solid var(--line); background:#fff; color:var(--ink); padding:10px 13px; border-radius:11px; font-weight:700; font-size:13px; }
+    .btn:hover { background:#f8fafc; }
+    .btn.primary { background:var(--accent);color:white;border-color:var(--accent); }
+    .btn.primary:hover { background:var(--accent-dark); }
+    .btn.dark { background:#111827;color:#fff;border-color:#111827; }
+    .btn.danger { color:var(--danger);border-color:#f1c7c3;background:#fff; }
+    .btn.small { padding:7px 9px;font-size:12px; }
+    .btn:disabled { opacity:.45;cursor:not-allowed; }
+    .notice { padding:12px 14px; background:var(--warning);border:1px solid #f0dca3;border-radius:12px;color:#6c5010;font-size:12px;line-height:1.45;margin-bottom:14px; }
+    .toolbar { display:flex; gap:9px; margin-bottom:13px; }
+    .search { flex:1;min-width:0; }
+    input,select,textarea { border:1px solid #d8dee8;border-radius:10px;background:#fff;color:var(--ink);padding:11px 12px;width:100%; }
+    input::placeholder,textarea::placeholder { color:#98a2b3; }
+    .categories { display:flex; gap:8px; overflow:auto; padding:1px 0 12px; scrollbar-width:thin; }
+    .cat { border:1px solid var(--line);background:#fff;color:#586275;border-radius:999px;padding:9px 14px;white-space:nowrap;font-size:13px;font-weight:700; }
+    .cat.active { background:#172033;color:#fff;border-color:#172033; }
+    .menu-grid { display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px; }
+    .menu-item { background:var(--panel);border:1px solid var(--line);border-radius:15px;padding:14px;min-height:136px;display:flex;flex-direction:column;justify-content:space-between;gap:14px;box-shadow:0 2px 5px #10182805; }
+    .menu-item.unavailable { opacity:.55; }
+    .item-top { display:flex;justify-content:space-between;align-items:flex-start;gap:8px; }
+    .item-name { font-weight:800;font-size:15px;line-height:1.25; }
+    .item-desc { color:var(--muted);font-size:12px;margin-top:6px;line-height:1.35; }
+    .price { font-size:16px;font-weight:850;white-space:nowrap; }
+    .item-bottom { display:flex;justify-content:space-between;align-items:center;gap:8px; }
+    .stock-label { font-size:10px;font-weight:800;color:#a34b11;background:#fff0df;padding:5px 7px;border-radius:6px; }
+    .add-btn { border:0;background:var(--soft);color:var(--accent);font-size:13px;font-weight:850;border-radius:9px;padding:9px 12px; }
+    .add-btn:disabled { background:#eef0f3;color:#9aa2af; }
+    .cart { background:#fff;border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);position:sticky;top:88px;overflow:hidden; }
+    .cart-head { padding:17px 17px 14px;border-bottom:1px solid var(--line); }
+    .cart-head-row { display:flex;justify-content:space-between;align-items:center;gap:8px; }
+    .cart-title { font-size:18px;font-weight:850; }
+    .count { background:#edf1f5;color:#536071;border-radius:999px;padding:4px 8px;font-size:11px;font-weight:800; }
+    .field-label { display:block;font-size:11px;font-weight:800;color:#5e6879;margin:13px 0 6px; }
+    .cart-body { padding:0 17px 16px; }
+    .order-type { display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:7px; }
+    .type-btn { border:1px solid var(--line);background:#fff;border-radius:9px;padding:9px 4px;font-size:11px;font-weight:800;color:#657084; }
+    .type-btn.active { background:#e8f4ef;color:var(--accent);border-color:#acd7c5; }
+    .cart-items { padding:12px 0 4px;max-height:34vh;overflow:auto; }
+    .empty { color:#8a94a4;font-size:13px;text-align:center;padding:26px 8px;line-height:1.5; }
+    .cart-row { display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;padding:11px 0;border-bottom:1px solid #eef0f4; }
+    .cart-row:last-child { border-bottom:0; }
+    .cart-item-name { font-weight:800;font-size:13px;line-height:1.3; }
+    .cart-item-price { color:var(--muted);font-size:12px;margin-top:4px; }
+    .qty { display:flex;align-items:center;gap:7px; }
+    .qty button { width:29px;height:29px;border:1px solid var(--line);border-radius:8px;background:#fff;font-weight:800; }
+    .qty strong { min-width:14px;text-align:center;font-size:13px; }
+    .note-input { margin-top:7px;padding:8px 9px;font-size:12px; }
+    .totals { border-top:1px solid var(--line);margin-top:10px;padding-top:12px; }
+    .total-row { display:flex;justify-content:space-between;gap:8px;margin:6px 0;color:#657084;font-size:13px; }
+    .total-row.grand { color:var(--ink);font-size:19px;font-weight:900;margin-top:12px; }
+    .cart-actions { display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px; }
+    .cart-actions .review { grid-column:1/-1; }
+    .footnote { color:#8b95a5;font-size:10px;line-height:1.45;margin-top:12px; }
+    .bottom-nav { display:none; }
+    .page { display:none; }
+    .page.active { display:block; }
+    .panel { background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow); }
+    .panel h2 { margin:0 0 5px;font-size:20px; }
+    .muted { color:var(--muted);font-size:13px;line-height:1.5; }
+    .form-grid { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:16px; }
+    .form-field label { display:block;font-size:12px;font-weight:800;margin-bottom:6px; }
+    .form-field.full { grid-column:1/-1; }
+    .form-actions { display:flex;gap:8px;flex-wrap:wrap;margin-top:14px; }
+    .table-wrap { overflow:auto;margin-top:16px; }
+    table { width:100%;border-collapse:collapse;font-size:13px; }
+    th,td { text-align:left;padding:11px 9px;border-bottom:1px solid #edf0f4;white-space:nowrap; }
+    th { color:#687386;font-size:11px;text-transform:uppercase;letter-spacing:.04em; }
+    .status { display:inline-block;border-radius:999px;padding:5px 8px;font-size:10px;font-weight:850;background:#edf1f5;color:#536071; }
+    .status.draft { background:#fff4d6;color:#855c00; }
+    .status.handed { background:#e8f4ef;color:#176b52; }
+    .empty-table { padding:22px;text-align:center;color:var(--muted);font-size:13px; }
+    .modal-backdrop { display:none;position:fixed;inset:0;background:#0b1220a6;z-index:30;padding:18px;align-items:center;justify-content:center; }
+    .modal-backdrop.open { display:flex; }
+    .modal { width:min(560px,100%);max-height:90dvh;overflow:auto;background:#fff;border-radius:18px;padding:20px;box-shadow:0 20px 60px #0004; }
+    .modal h2 { margin:0 0 5px;font-size:21px; }
+    .modal-actions { display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;margin-top:18px; }
+    .review-line { display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid #edf0f4;font-size:13px; }
+    .review-line:last-child { border-bottom:0; }
+    .toast { position:fixed;bottom:18px;left:50%;transform:translate(-50%,20px);background:#111827;color:#fff;padding:12px 16px;border-radius:12px;font-size:13px;box-shadow:var(--shadow);z-index:50;opacity:0;pointer-events:none;transition:.2s;max-width:calc(100% - 24px); }
+    .toast.show { opacity:1;transform:translate(-50%,0); }
+    .small-label { color:var(--muted);font-size:11px; }
+    @media (max-width:1050px) { .layout { grid-template-columns:minmax(0,1fr) 320px;gap:12px;padding:12px; } .menu-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+    @media (max-width:760px) {
+      header { padding:11px 13px; } .logo { width:38px;height:38px; } h1 { font-size:16px; }
+      .pill { display:none; } .layout { display:block;padding:12px 12px 94px; }
+      .cart { position:static;margin-top:14px; }
+      .menu-grid { grid-template-columns:repeat(2,minmax(0,1fr));gap:9px; }
+      .menu-item { padding:11px;min-height:132px; }
+      .item-name { font-size:13px; } .price { font-size:14px; }
+      .section-title { font-size:21px; }
+      .bottom-nav { position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--line);padding:8px 8px calc(8px + env(safe-area-inset-bottom));display:grid;grid-template-columns:repeat(3,1fr);z-index:15; }
+      .nav-btn { background:transparent;border:0;border-radius:10px;padding:8px 4px;color:#6c7687;font-size:11px;font-weight:800;display:flex;flex-direction:column;align-items:center;gap:4px; }
+      .nav-btn span:first-child { font-size:18px; } .nav-btn.active { background:var(--soft);color:var(--accent); }
+      .cart { top:auto; } .cart-items { max-height:none; }
+      .form-grid { grid-template-columns:1fr; } .form-field.full { grid-column:auto; }
+    }
+    @media (max-width:380px) { .menu-grid { grid-template-columns:1fr; } .toolbar { flex-wrap:wrap; } .search { flex-basis:100%; } }
+  </style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="brand">
+      <div class="logo">W</div>
+      <div>
+        <h1>Waiter Mirror</h1>
+        <div class="subhead">Order companion · MVP</div>
+      </div>
+    </div>
+    <div class="header-actions">
+      <span class="pill">DEMO MODE · Manual POS handoff</span>
+      <button class="btn" id="headerOrdersBtn" type="button">Orders <span id="orderCountHeader">0</span></button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <main class="main">
+      <section class="page active" id="menuPage">
+        <div class="topline">
+          <div><div class="eyebrow">Waiter workspace</div><h2 class="section-title">Menu</h2></div>
+          <button class="btn" id="manageMenuBtn" type="button">⚙ Manage menu</button>
+        </div>
+        <div class="notice"><strong>Mirror-only mode.</strong> This app prepares an order draft. It does not connect to Qashier, charge customers, or submit orders to the POS. Enter the confirmed order into your existing POS.</div>
+        <div class="toolbar">
+          <input class="search" id="searchInput" type="search" placeholder="Search menu items…" aria-label="Search menu items">
+          <button class="btn" id="clearSearchBtn" type="button">Clear</button>
+        </div>
+        <div class="categories" id="categories"></div>
+        <div class="menu-grid" id="menuGrid"></div>
+      </section>
+
+      <section class="page" id="ordersPage">
+        <div class="topline">
+          <div><div class="eyebrow">Local device records</div><h2 class="section-title">Order drafts</h2></div>
+          <button class="btn" id="exportOrdersBtn" type="button">Export CSV</button>
+        </div>
+        <div class="notice">Orders are saved in this browser on this device only. They are not shared with other tablets and are not official POS transactions.</div>
+        <div class="panel">
+          <h2>Recent orders</h2>
+          <div class="muted">Review an order, copy its details for POS entry, or mark it as handed off after confirming it was entered into the existing POS.</div>
+          <div class="table-wrap" id="ordersTable"></div>
+        </div>
+      </section>
+
+      <section class="page" id="adminPage">
+        <div class="topline">
+          <div><div class="eyebrow">Manager tools</div><h2 class="section-title">Menu manager</h2></div>
+          <button class="btn" id="backToMenuBtn" type="button">← Back to menu</button>
+        </div>
+        <div class="notice">Demo menu data is stored locally in this browser. Changes here do not update Qashier or any other tablet.</div>
+        <div class="panel">
+          <h2 id="formTitle">Add menu item</h2>
+          <div class="muted">Use your own menu names and exact POS prices before service.</div>
+          <form id="menuForm">
+            <input type="hidden" id="editItemId">
+            <div class="form-grid">
+              <div class="form-field"><label for="itemName">Item name *</label><input id="itemName" required maxlength="80" placeholder="e.g. Iced Latte"></div>
+              <div class="form-field"><label for="itemCategory">Category *</label><input id="itemCategory" required maxlength="40" placeholder="e.g. Drinks" list="categorySuggestions"><datalist id="categorySuggestions"><option>Food</option><option>Drinks</option><option>Cocktails</option><option>Desserts</option></datalist></div>
+              <div class="form-field"><label for="itemPrice">Price (PHP) *</label><input id="itemPrice" required type="number" min="0" step="0.01" inputmode="decimal" placeholder="150.00"></div>
+              <div class="form-field"><label for="itemAvailable">Availability</label><select id="itemAvailable"><option value="true">Available</option><option value="false">Sold out</option></select></div>
+              <div class="form-field full"><label for="itemDescription">Short description (optional)</label><input id="itemDescription" maxlength="140" placeholder="Ingredients, size, or helpful note"></div>
+            </div>
+            <div class="form-actions"><button class="btn primary" type="submit" id="saveItemBtn">Save item</button><button class="btn" type="button" id="resetItemFormBtn">Clear form</button><button class="btn" type="button" id="importMenuBtn">Import menu CSV</button><input type="file" id="menuFileInput" accept=".csv,text/csv" hidden></div>
+          </form>
+          <div class="table-wrap" id="menuTable"></div>
+          <div class="form-actions"><button class="btn" type="button" id="exportMenuBtn">Export menu CSV</button><button class="btn danger" type="button" id="resetDemoBtn">Reset demo menu</button></div>
+        </div>
+      </section>
+    </main>
+
+    <aside class="cart" id="cartPanel">
+      <div class="cart-head">
+        <div class="cart-head-row"><div class="cart-title">Current order</div><span class="count" id="cartCount">0 items</span></div>
+        <label class="field-label" for="tableSelect">Table / order reference</label>
+        <select id="tableSelect">
+          <option value="">Choose table or order type</option>
+          <option>Table 1</option><option>Table 2</option><option>Table 3</option><option>Table 4</option>
+          <option>Table 5</option><option>Table 6</option><option>Table 7</option><option>Table 8</option>
+          <option>Table 9</option><option>Table 10</option><option>Table 11</option><option>Table 12</option>
+          <option>Counter / Takeaway</option><option>Bar</option>
+        </select>
+        <div class="order-type" id="orderTypes">
+          <button class="type-btn active" data-type="Dine-in" type="button">Dine-in</button>
+          <button class="type-btn" data-type="Takeaway" type="button">Takeaway</button>
+          <button class="type-btn" data-type="Bar" type="button">Bar</button>
+        </div>
+      </div>
+      <div class="cart-body">
+        <div class="cart-items" id="cartItems"><div class="empty">Your order is empty.<br>Tap a menu item to begin.</div></div>
+        <label class="field-label" for="orderNote">Order note (optional)</label>
+        <textarea id="orderNote" rows="2" maxlength="300" placeholder="e.g. Split bill request; allergy note to confirm"></textarea>
+        <div class="totals">
+          <div class="total-row"><span>Items</span><strong id="subtotalItems">0</strong></div>
+          <div class="total-row"><span>Subtotal</span><strong id="subtotalValue">₱0.00</strong></div>
+          <div class="total-row grand"><span>Order total</span><strong id="grandTotal">₱0.00</strong></div>
+        </div>
+        <div class="cart-actions">
+          <button class="btn" id="clearOrderBtn" type="button">Clear</button>
+          <button class="btn" id="saveDraftBtn" type="button">Save draft</button>
+          <button class="btn primary review" id="reviewOrderBtn" type="button">Review order →</button>
+        </div>
+        <div class="footnote">Estimate only. Taxes, discounts, service charges, and final totals must be verified in the official POS.</div>
+      </div>
+    </aside>
+  </div>
+
+  <nav class="bottom-nav" aria-label="Main navigation">
+    <button class="nav-btn active" data-page="menuPage" type="button"><span>☷</span><span>Menu</span></button>
+    <button class="nav-btn" data-page="ordersPage" type="button"><span>▤</span><span>Orders</span></button>
+    <button class="nav-btn" data-page="adminPage" type="button"><span>⚙</span><span>Manage</span></button>
+  </nav>
+</div>
+
+<div class="modal-backdrop" id="reviewModal" role="dialog" aria-modal="true" aria-labelledby="reviewTitle">
+  <div class="modal">
+    <h2 id="reviewTitle">Review order</h2>
+    <div class="muted" id="reviewSubtitle">Check the order before entering it into the POS.</div>
+    <div id="reviewContents"></div>
+    <div class="notice" style="margin-top:14px;margin-bottom:0">This action saves a local draft only. It does not send anything to Qashier or the kitchen.</div>
+    <div class="modal-actions">
+      <button class="btn" id="closeReviewBtn" type="button">Back to edit</button>
+      <button class="btn" id="copyOrderBtn" type="button">Copy order</button>
+      <button class="btn primary" id="confirmSaveBtn" type="button">Save order draft</button>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(() => {
+  'use strict';
+  const KEYS = { menu: 'waiterMirror.menu.v1', orders: 'waiterMirror.orders.v1' };
+  const DEMO_MENU = [
+    {id:'F001',name:'Chicken Rice',category:'Food',description:'Grilled chicken with rice',price:159,available:true},
+    {id:'F002',name:'Crispy Fries',category:'Food',description:'Golden, seasoned fries',price:99,available:true},
+    {id:'F003',name:'Beef Burger',category:'Food',description:'Beef patty, lettuce and house sauce',price:189,available:true},
+    {id:'F004',name:'Garlic Rice',category:'Food',description:'Garlic-fried rice',price:55,available:true},
+    {id:'D001',name:'Iced Latte',category:'Drinks',description:'Espresso and chilled milk',price:120,available:true},
+    {id:'D002',name:'Calamansi Soda',category:'Drinks',description:'Citrus soda over ice',price:85,available:true},
+    {id:'D003',name:'Bottled Water',category:'Drinks',description:'Still water',price:35,available:true},
+    {id:'C001',name:'Mojito',category:'Cocktails',description:'Mint, lime and soda',price:220,available:true},
+    {id:'C002',name:'House Highball',category:'Cocktails',description:'House pour with soda',price:240,available:false},
+    {id:'S001',name:'Chocolate Brownie',category:'Desserts',description:'Warm brownie',price:95,available:true}
+  ];
+  const $ = id => document.getElementById(id);
+  const money = value => '₱' + Number(value || 0).toLocaleString('en-PH',{minimumFractionDigits:2,maximumFractionDigits:2});
+  const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const uid = prefix => prefix + '-' + Date.now().toString(36).toUpperCase() + '-' + Math.random().toString(36).slice(2,7).toUpperCase();
+  function load(key, fallback) {
+    try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : structuredClone(fallback); }
+    catch (_) { return structuredClone(fallback); }
+  }
+  function persist(key, value) {
+    try { localStorage.setItem(key, JSON.stringify(value)); return true; }
+    catch (_) { toast('Could not save. Browser storage may be full or disabled.'); return false; }
+  }
+  let menu = load(KEYS.menu, DEMO_MENU);
+  let orders = load(KEYS.orders, []);
+  let category = 'All';
+  let orderType = 'Dine-in';
+  let cart = [];
+  let toastTimer;
+  function toast(message) {
+    const el = $('toast'); el.textContent = message; el.classList.add('show');
+    clearTimeout(toastTimer); toastTimer = setTimeout(() => el.classList.remove('show'), 2600);
+  }
+  function showPage(id) {
+    document.querySelectorAll('.page').forEach(p => p.classList.toggle('active', p.id === id));
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.toggle('active', b.dataset.page === id));
+    $('cartPanel').style.display = id === 'adminPage' || id === 'ordersPage' ? 'none' : '';
+    if (id === 'ordersPage') renderOrders();
+    if (id === 'adminPage') renderMenuTable();
+    window.scrollTo({top:0,behavior:'smooth'});
+  }
+  function categories() {
+    const cats = ['All', ...new Set(menu.map(m => m.category).filter(Boolean).sort((a,b)=>a.localeCompare(b)))];
+    if (!cats.includes(category)) category = 'All';
+    $('categories').innerHTML = cats.map(c => `<button class="cat ${c===category?'active':''}" data-category="${esc(c)}" type="button">${esc(c)}</button>`).join('');
+  }
+  function renderMenu() {
+    categories();
+    const q = $('searchInput').value.trim().toLowerCase();
+    const visible = menu.filter(m => (category === 'All' || m.category === category) && (!q || `${m.name} ${m.category} ${m.description||''}`.toLowerCase().includes(q)));
+    $('menuGrid').innerHTML = visible.length ? visible.map(m => `
+      <article class="menu-item ${m.available?'':'unavailable'}">
+        <div class="item-top"><div><div class="item-name">${esc(m.name)}</div><div class="item-desc">${esc(m.description||m.category)}</div></div><div class="price">${money(m.price)}</div></div>
+        <div class="item-bottom">${m.available ? '<span class="small-label">Available</span>' : '<span class="stock-label">SOLD OUT</span>'}
+          <button class="add-btn" type="button" data-add="${esc(m.id)}" ${m.available?'':'disabled'}>${m.available?'+ Add':'Unavailable'}</button>
+        </div>
+      </article>`).join('') : '<div class="empty">No menu items found.</div>';
+  }
+  function cartCount() { return cart.reduce((sum,item)=>sum+item.qty,0); }
+  function total() { return cart.reduce((sum,item)=>sum+item.qty*item.price,0); }
+  function renderCart() {
+    $('cartCount').textContent = `${cartCount()} item${cartCount()===1?'':'s'}`;
+    $('subtotalItems').textContent = cartCount();
+    $('subtotalValue').textContent = money(total());
+    $('grandTotal').textContent = money(total());
+    $('cartItems').innerHTML = cart.length ? cart.map(item => `
+      <div class="cart-row">
+        <div><div class="cart-item-name">${esc(item.name)}</div><div class="cart-item-price">${money(item.price)} each · ${money(item.price*item.qty)}</div>
+          <input class="note-input" data-note="${esc(item.id)}" maxlength="160" placeholder="Item note (optional)" value="${esc(item.note||'')}" aria-label="Note for ${esc(item.name)}">
+        </div>
+        <div class="qty"><button type="button" data-qty="-1" data-id="${esc(item.id)}" aria-label="Decrease quantity">−</button><strong>${item.qty}</strong><button type="button" data-qty="1" data-id="${esc(item.id)}" aria-label="Increase quantity">+</button></div>
+      </div>`).join('') : '<div class="empty">Your order is empty.<br>Tap a menu item to begin.</div>';
+    $('orderCountHeader').textContent = orders.length;
+  }
+  function addItem(id) {
+    const item = menu.find(m=>m.id===id);
+    if (!item || !item.available) return;
+    const found = cart.find(c=>c.id===id);
+    if (found) found.qty++; else cart.push({id:item.id,name:item.name,price:Number(item.price),qty:1,note:''});
+    renderCart(); toast(`${item.name} added`);
+  }
+  function resetCart() {
+    cart=[]; $('orderNote').value=''; $('tableSelect').value='';
+    orderType='Dine-in'; document.querySelectorAll('.type-btn').forEach(b=>b.classList.toggle('active',b.dataset.type===orderType));
+    renderCart();
+  }
+  function buildOrder() {
+    const table = $('tableSelect').value;
+    if (!table) { toast('Choose a table or order reference first.'); $('tableSelect').focus(); return null; }
+    if (!cart.length) { toast('Add at least one menu item.'); return null; }
+    return {
+      id:uid('WM'), createdAt:new Date().toISOString(), table, orderType,
+      note:$('orderNote').value.trim(),
+      items:cart.map(c=>({id:c.id,name:c.name,price:Number(c.price),qty:Number(c.qty),note:(c.note||'').trim()})),
+      total:Number(total().toFixed(2)), status:'Draft', handoffAt:null
+    };
+  }
+  function orderText(o) {
+    const lines = [`Waiter Mirror — ${o.id}`,`Type: ${o.orderType}`,`Table/reference: ${o.table}`,`Created: ${new Date(o.createdAt).toLocaleString()}`,'','ITEMS',...o.items.map(i=>`${i.qty} × ${i.name} @ ${money(i.price)} = ${money(i.qty*i.price)}${i.note?' — Note: '+i.note:''}`),'',`Subtotal: ${money(o.total)}`];
+    if(o.note) lines.push(`Order note: ${o.note}`);
+    lines.push('','MANUAL POS HANDOFF REQUIRED — verify prices and final total in the official POS.');
+    return lines.join('\n');
+  }
+  function openReview() {
+    const o=buildOrder(); if(!o) return;
+    $('reviewSubtitle').textContent = `${o.table} · ${o.orderType} · ${o.id}`;
+    $('reviewContents').innerHTML = o.items.map(i=>`<div class="review-line"><div><strong>${i.qty} × ${esc(i.name)}</strong>${i.note?`<div class="small-label">${esc(i.note)}</div>`:''}</div><strong>${money(i.qty*i.price)}</strong></div>`).join('')+
+      `<div class="review-line"><span>Subtotal estimate</span><strong>${money(o.total)}</strong></div>`+
+      (o.note?`<div class="review-line"><span>Order note</span><span>${esc(o.note)}</span></div>`:'');
+    $('reviewModal').dataset.order = JSON.stringify(o);
+    $('reviewModal').classList.add('open');
+  }
+  function saveCurrentDraft() {
+    const o=buildOrder(); if(!o) return;
+    orders.unshift(o);
+    if(persist(KEYS.orders,orders)) {
+      renderCart(); renderOrders(); toast('Draft saved on this device.');
+      return o;
+    }
+    orders.shift(); return null;
+  }
+  function renderOrders() {
+    $('orderCountHeader').textContent = orders.length;
+    if (!orders.length) { $('ordersTable').innerHTML='<div class="empty-table">No saved drafts yet.</div>'; return; }
+    $('ordersTable').innerHTML = `<table><thead><tr><th>Order</th><th>Table</th><th>Total</th><th>Status</th><th>Actions</th></tr></thead><tbody>${orders.map(o=>`
+      <tr><td><strong>${esc(o.id)}</strong><div class="small-label">${new Date(o.createdAt).toLocaleString()}</div></td><td>${esc(o.table)}</td><td>${money(o.total)}</td><td><span class="status ${o.status==='Handed off'?'handed':'draft'}">${esc(o.status)}</span></td><td><button class="btn small" type="button" data-copy-order="${esc(o.id)}">Copy</button> ${o.status!=='Handed off'?`<button class="btn small primary" type="button" data-handoff="${esc(o.id)}">Mark handed off</button>`:''}</td></tr>`).join('')}</tbody></table>`;
+  }
+  async function copyText(text) {
+    try { await navigator.clipboard.writeText(text); toast('Order copied.'); }
+    catch (_) {
+      const ta=document.createElement('textarea'); ta.value=text; ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();
+      try { document.execCommand('copy'); toast('Order copied.'); } catch(e) { toast('Copy unavailable. Select and copy the order manually.'); }
+      ta.remove();
+    }
+  }
+  function csvEscape(value) { const s=String(value??''); return /[",\r\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s; }
+  function downloadFile(filename, content, type='text/csv;charset=utf-8;') {
+    const blob=new Blob([content],{type}); const url=URL.createObjectURL(blob); const a=document.createElement('a');
+    a.href=url;a.download=filename;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);
+  }
+  function exportMenu() {
+    const rows=[['item_id','category','name','description','price','available'],...menu.map(m=>[m.id,m.category,m.name,m.description||'',m.price,m.available?'TRUE':'FALSE'])];
+    downloadFile('waiter-mirror-menu.csv',rows.map(r=>r.map(csvEscape).join(',')).join('\r\n'));
+  }
+  function exportOrders() {
+    const rows=[['order_id','created_at','table','order_type','status','item_count','total_php','order_note','items_json'],...orders.map(o=>[o.id,o.createdAt,o.table,o.orderType,o.status,o.items.reduce((s,i)=>s+i.qty,0),o.total,o.note,JSON.stringify(o.items)])];
+    downloadFile('waiter-mirror-orders.csv',rows.map(r=>r.map(csvEscape).join(',')).join('\r\n'));
+  }
+  function renderMenuTable() {
+    $('menuTable').innerHTML = menu.length ? `<table><thead><tr><th>Item</th><th>Category</th><th>Price</th><th>Availability</th><th>Actions</th></tr></thead><tbody>${menu.map(m=>`
+      <tr><td><strong>${esc(m.name)}</strong><div class="small-label">${esc(m.id)}</div></td><td>${esc(m.category)}</td><td>${money(m.price)}</td><td><span class="status ${m.available?'handed':'draft'}">${m.available?'Available':'Sold out'}</span></td><td><button class="btn small" data-edit="${esc(m.id)}" type="button">Edit</button> <button class="btn small danger" data-delete="${esc(m.id)}" type="button">Delete</button></td></tr>`).join('')}</tbody></table>` : '<div class="empty-table">No menu items yet. Add one above or import a CSV.</div>';
+  }
+  function clearMenuForm() {
+    $('menuForm').reset();$('editItemId').value='';$('formTitle').textContent='Add menu item';$('saveItemBtn').textContent='Save item';$('itemAvailable').value='true';
+  }
+  function editMenuItem(id) {
+    const m=menu.find(x=>x.id===id);if(!m)return;
+    $('editItemId').value=m.id;$('itemName').value=m.name;$('itemCategory').value=m.category;$('itemPrice').value=m.price;
+    $('itemAvailable').value=String(m.available);$('itemDescription').value=m.description||'';
+    $('formTitle').textContent='Edit menu item';$('saveItemBtn').textContent='Update item';$('itemName').focus();
+  }
+  function parseCSV(text) {
+    const rows=[];let row=[],cell='',quoted=false;
+    for(let i=0;i<text.length;i++){
+      const ch=text[i];
+      if(quoted){if(ch==='"'&&text[i+1]==='"'){cell+='"';i++;}else if(ch==='"')quoted=false;else cell+=ch;}
+      else if(ch==='"')quoted=true;
+      else if(ch===','){row.push(cell);cell='';}
+      else if(ch==='\n'){row.push(cell.replace(/\r$/,''));rows.push(row);row=[];cell='';}
+      else cell+=ch;
+    }
+    if(cell.length||row.length){row.push(cell.replace(/\r$/,''));rows.push(row);}
+    return rows.filter(r=>r.some(c=>c.trim()!==''));
+  }
+  function importCSVFile(file) {
+    const reader=new FileReader();
+    reader.onload=()=>{
+      try{
+        const rows=parseCSV(String(reader.result||''));if(rows.length<2)throw new Error('CSV needs a header and at least one item.');
+        const headers=rows[0].map(h=>h.trim().toLowerCase());
+        const col=name=>headers.indexOf(name);
+        if(col('name')<0||col('category')<0||col('price')<0)throw new Error('Required columns: name, category, price. Optional: item_id, description, available.');
+        const imported=rows.slice(1).map(r=>{
+          const get=k=>col(k)>=0?(r[col(k)]||'').trim():'';
+          const price=Number(get('price'));if(!get('name')||!get('category')||!Number.isFinite(price)||price<0)throw new Error('Every row needs a name, category and valid non-negative price.');
+          const av=get('available').toLowerCase();
+          return {id:get('item_id')||uid('ITEM'),name:get('name'),category:get('category'),description:get('description'),price,available:!['false','0','no','sold out'].includes(av)};
+        });
+        if(!confirm(`Import ${imported.length} items? This replaces the current menu on this device.`))return;
+        menu=imported;if(persist(KEYS.menu,menu)){category='All';renderMenu();renderMenuTable();clearMenuForm();toast('Menu imported on this device.');}
+      }catch(e){alert('Could not import menu: '+e.message);}
+      $('menuFileInput').value='';
+    };reader.readAsText(file);
+  }
+
+  document.addEventListener('click',e=>{
+    const add=e.target.closest('[data-add]');if(add)addItem(add.dataset.add);
+    const cat=e.target.closest('[data-category]');if(cat){category=cat.dataset.category;renderMenu();}
+    const qty=e.target.closest('[data-qty]');if(qty){const item=cart.find(c=>c.id===qty.dataset.id);if(item){item.qty+=Number(qty.dataset.qty);if(item.qty<=0)cart=cart.filter(c=>c.id!==item.id);renderCart();}}
+    const edit=e.target.closest('[data-edit]');if(edit)editMenuItem(edit.dataset.edit);
+    const del=e.target.closest('[data-delete]');if(del&&confirm('Delete this menu item from this device?')){menu=menu.filter(m=>m.id!==del.dataset.delete);persist(KEYS.menu,menu);renderMenu();renderMenuTable();toast('Menu item deleted.');}
+    const copy=e.target.closest('[data-copy-order]');if(copy){const o=orders.find(o=>o.id===copy.dataset.copyOrder);if(o)copyText(orderText(o));}
+    const hand=e.target.closest('[data-handoff]');if(hand){const o=orders.find(o=>o.id===hand.dataset.handoff);if(o&&confirm('Confirm that this order was manually entered into the official POS?')){o.status='Handed off';o.handoffAt=new Date().toISOString();persist(KEYS.orders,orders);renderOrders();toast('Marked as handed off.');}}
+    const nav=e.target.closest('[data-page]');if(nav)showPage(nav.dataset.page);
+    const typ=e.target.closest('[data-type]');if(typ){orderType=typ.dataset.type;document.querySelectorAll('.type-btn').forEach(b=>b.classList.toggle('active',b===typ));}
+  });
+  $('searchInput').addEventListener('input',renderMenu);
+  $('clearSearchBtn').addEventListener('click',()=>{$('searchInput').value='';renderMenu();});
+  $('tableSelect').addEventListener('change',()=>{});
+  $('orderNote').addEventListener('input',()=>{});
+  $('cartItems').addEventListener('input',e=>{const input=e.target.closest('[data-note]');if(input){const item=cart.find(c=>c.id===input.dataset.note);if(item)item.note=input.value;}});
+  $('clearOrderBtn').addEventListener('click',()=>{if(cart.length&&!confirm('Clear the current unsaved order?'))return;resetCart();toast('Current order cleared.');});
+  $('saveDraftBtn').addEventListener('click',()=>{const o=saveCurrentDraft();if(o)resetCart();});
+  $('reviewOrderBtn').addEventListener('click',openReview);
+  $('closeReviewBtn').addEventListener('click',()=>$('reviewModal').classList.remove('open'));
+  $('confirmSaveBtn').addEventListener('click',()=>{
+    let o;try{o=JSON.parse($('reviewModal').dataset.order||'null');}catch(_){}
+    if(!o)return;
+    // Keep the reviewed snapshot; saving is local only and never submits to a POS.
+    orders.unshift(o);
+    if(persist(KEYS.orders,orders)){ $('reviewModal').classList.remove('open');resetCart();renderOrders();toast('Order draft saved on this device.');}
+    else orders.shift();
+  });
+  $('copyOrderBtn').addEventListener('click',()=>{try{const o=JSON.parse($('reviewModal').dataset.order||'null');if(o)copyText(orderText(o));}catch(_){}});
+  $('reviewModal').addEventListener('click',e=>{if(e.target===$('reviewModal'))$('reviewModal').classList.remove('open');});
+  $('manageMenuBtn').addEventListener('click',()=>showPage('adminPage'));
+  $('backToMenuBtn').addEventListener('click',()=>showPage('menuPage'));
+  $('headerOrdersBtn').addEventListener('click',()=>showPage('ordersPage'));
+  $('exportOrdersBtn').addEventListener('click',exportOrders);
+  $('exportMenuBtn').addEventListener('click',exportMenu);
+  $('resetItemFormBtn').addEventListener('click',clearMenuForm);
+  $('importMenuBtn').addEventListener('click',()=>$('menuFileInput').click());
+  $('menuFileInput').addEventListener('change',e=>{if(e.target.files&&e.target.files[0])importCSVFile(e.target.files[0]);});
+  $('resetDemoBtn').addEventListener('click',()=>{if(confirm('Replace your local menu with the sample demo menu?')){menu=structuredClone(DEMO_MENU);persist(KEYS.menu,menu);category='All';renderMenu();renderMenuTable();clearMenuForm();toast('Demo menu restored.');}});
+  $('menuForm').addEventListener('submit',e=>{
+    e.preventDefault();
+    const id=$('editItemId').value||uid('ITEM');const price=Number($('itemPrice').value);
+    if(!Number.isFinite(price)||price<0){toast('Enter a valid price.');return;}
+    const item={id,name:$('itemName').value.trim(),category:$('itemCategory').value.trim(),price,available:$('itemAvailable').value==='true',description:$('itemDescription').value.trim()};
+    if(!item.name||!item.category){toast('Enter an item name and category.');return;}
+    const idx=menu.findIndex(m=>m.id===id);if(idx>=0)menu[idx]=item;else menu.push(item);
+    if(persist(KEYS.menu,menu)){clearMenuForm();renderMenu();renderMenuTable();toast('Menu saved on this device.');}
+  });
+  // Initial render
+  renderMenu();renderCart();renderOrders();
+})();
+</script>
+</body>
+</html>
