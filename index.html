@@ -4,7 +4,10 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#111827">
-  <title>Waiter Mirror — Order Companion</title>
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>Waiter Mirror — Landscape Order Pad</title>
   <style>
     :root {
       --bg:#f4f6f8; --panel:#fff; --ink:#172033; --muted:#687386;
@@ -25,7 +28,7 @@
     .subhead { font-size:12px;color:#c4ccd8;margin-top:4px; }
     .header-actions { display:flex; align-items:center; gap:8px; }
     .pill { border:1px solid #465165;color:#e7edf5;border-radius:999px;padding:8px 11px;font-size:12px;white-space:nowrap; }
-    .layout { display:grid; grid-template-columns:minmax(0,1fr) 355px; gap:18px; padding:18px; align-items:start; flex:1; }
+    .layout { display:grid; grid-template-columns:minmax(0,1fr) 320px; gap:14px; padding:14px; align-items:start; flex:1; }
     .main { min-width:0; }
     .topline { display:flex; justify-content:space-between; align-items:center; gap:12px; margin:2px 0 14px; flex-wrap:wrap; }
     .eyebrow { color:var(--muted);font-size:12px;font-weight:750;text-transform:uppercase;letter-spacing:.08em; }
@@ -46,18 +49,18 @@
     .categories { display:flex; gap:8px; overflow:auto; padding:1px 0 12px; scrollbar-width:thin; }
     .cat { border:1px solid var(--line);background:#fff;color:#586275;border-radius:999px;padding:9px 14px;white-space:nowrap;font-size:13px;font-weight:700; }
     .cat.active { background:#172033;color:#fff;border-color:#172033; }
-    .menu-grid { display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px; }
-    .menu-item { background:var(--panel);border:1px solid var(--line);border-radius:15px;padding:14px;min-height:136px;display:flex;flex-direction:column;justify-content:space-between;gap:14px;box-shadow:0 2px 5px #10182805; }
+    .menu-grid { display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px; }
+    .menu-item { background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px;min-height:145px;display:flex;flex-direction:column;justify-content:space-between;gap:10px;box-shadow:0 2px 5px #10182805; }
     .menu-item.unavailable { opacity:.55; }
     .item-top { display:flex;justify-content:space-between;align-items:flex-start;gap:8px; }
-    .item-name { font-weight:800;font-size:15px;line-height:1.25; }
-    .item-desc { color:var(--muted);font-size:12px;margin-top:6px;line-height:1.35; }
-    .price { font-size:16px;font-weight:850;white-space:nowrap; }
+    .item-name { font-weight:850;font-size:16px;line-height:1.2; }
+    .item-desc { color:var(--muted);font-size:11px;margin-top:5px;line-height:1.3; }
+    .price { font-size:17px;font-weight:900;white-space:nowrap; }
     .item-bottom { display:flex;justify-content:space-between;align-items:center;gap:8px; }
     .stock-label { font-size:10px;font-weight:800;color:#a34b11;background:#fff0df;padding:5px 7px;border-radius:6px; }
-    .add-btn { border:0;background:var(--soft);color:var(--accent);font-size:13px;font-weight:850;border-radius:9px;padding:9px 12px; }
+    .add-btn { border:0;background:var(--accent);color:white;font-size:14px;font-weight:900;border-radius:10px;padding:10px 12px;min-width:68px; }
     .add-btn:disabled { background:#eef0f3;color:#9aa2af; }
-    .cart { background:#fff;border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);position:sticky;top:88px;overflow:hidden; }
+    .cart { background:#fff;border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);position:sticky;top:78px;overflow:hidden; }
     .cart-head { padding:17px 17px 14px;border-bottom:1px solid var(--line); }
     .cart-head-row { display:flex;justify-content:space-between;align-items:center;gap:8px; }
     .cart-title { font-size:18px;font-weight:850; }
@@ -111,20 +114,31 @@
     .toast { position:fixed;bottom:18px;left:50%;transform:translate(-50%,20px);background:#111827;color:#fff;padding:12px 16px;border-radius:12px;font-size:13px;box-shadow:var(--shadow);z-index:50;opacity:0;pointer-events:none;transition:.2s;max-width:calc(100% - 24px); }
     .toast.show { opacity:1;transform:translate(-50%,0); }
     .small-label { color:var(--muted);font-size:11px; }
-    @media (max-width:1050px) { .layout { grid-template-columns:minmax(0,1fr) 320px;gap:12px;padding:12px; } .menu-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+    @media (max-width:1100px) {
+      .layout { grid-template-columns:minmax(0,1fr) 300px;gap:10px;padding:10px; }
+      .menu-grid { grid-template-columns:repeat(3,minmax(0,1fr));gap:9px; }
+      .menu-item { min-height:132px;padding:10px; }
+    }
     @media (max-width:760px) {
-      header { padding:11px 13px; } .logo { width:38px;height:38px; } h1 { font-size:16px; }
-      .pill { display:none; } .layout { display:block;padding:12px 12px 94px; }
-      .cart { position:static;margin-top:14px; }
-      .menu-grid { grid-template-columns:repeat(2,minmax(0,1fr));gap:9px; }
+      header { padding:9px 11px; } .logo { width:36px;height:36px; } h1 { font-size:15px; }
+      .subhead { font-size:11px; } .pill { display:none; }
+      /* Portrait remains usable, but the app strongly favors the tablet's landscape workspace. */
+      .layout { display:block;padding:10px 10px 88px; }
+      .cart { position:static;margin-top:12px; }
+      .menu-grid { grid-template-columns:repeat(2,minmax(0,1fr));gap:8px; }
       .menu-item { padding:11px;min-height:132px; }
-      .item-name { font-size:13px; } .price { font-size:14px; }
-      .section-title { font-size:21px; }
-      .bottom-nav { position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--line);padding:8px 8px calc(8px + env(safe-area-inset-bottom));display:grid;grid-template-columns:repeat(3,1fr);z-index:15; }
-      .nav-btn { background:transparent;border:0;border-radius:10px;padding:8px 4px;color:#6c7687;font-size:11px;font-weight:800;display:flex;flex-direction:column;align-items:center;gap:4px; }
+      .item-name { font-size:14px; } .price { font-size:15px; }
+      .section-title { font-size:20px; }
+      .bottom-nav { position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--line);padding:7px 8px calc(7px + env(safe-area-inset-bottom));display:grid;grid-template-columns:repeat(3,1fr);z-index:15; }
+      .nav-btn { background:transparent;border:0;border-radius:10px;padding:7px 4px;color:#6c7687;font-size:11px;font-weight:800;display:flex;flex-direction:column;align-items:center;gap:4px; }
       .nav-btn span:first-child { font-size:18px; } .nav-btn.active { background:var(--soft);color:var(--accent); }
       .cart { top:auto; } .cart-items { max-height:none; }
       .form-grid { grid-template-columns:1fr; } .form-field.full { grid-column:auto; }
+    }
+    @media (orientation:portrait) and (min-width:600px) {
+      .layout { grid-template-columns:1fr; }
+      .cart { position:static; }
+      .menu-grid { grid-template-columns:repeat(3,minmax(0,1fr)); }
     }
     @media (max-width:380px) { .menu-grid { grid-template-columns:1fr; } .toolbar { flex-wrap:wrap; } .search { flex-basis:100%; } }
   </style>
@@ -140,7 +154,8 @@
       </div>
     </div>
     <div class="header-actions">
-      <span class="pill">DEMO MODE · Manual POS handoff</span>
+      <span class="pill">LANDSCAPE · Manual POS handoff</span>
+      <button class="btn" data-landscape type="button" title="Request landscape orientation">↻ Landscape</button>
       <button class="btn" id="headerOrdersBtn" type="button">Orders <span id="orderCountHeader">0</span></button>
     </div>
   </header>
@@ -152,7 +167,7 @@
           <div><div class="eyebrow">Waiter workspace</div><h2 class="section-title">Menu</h2></div>
           <button class="btn" id="manageMenuBtn" type="button">⚙ Manage menu</button>
         </div>
-        <div class="notice"><strong>Mirror-only mode.</strong> This app prepares an order draft. It does not connect to Qashier, charge customers, or submit orders to the POS. Enter the confirmed order into your existing POS.</div>
+        <div class="notice"><strong>Manual POS handoff.</strong> Build and review the order here, then enter it into your existing POS. This app does not connect to Qashier or process payments. For the intended layout, rotate the tablet to landscape; use the Landscape button to request orientation lock where supported.</div>
         <div class="toolbar">
           <input class="search" id="searchInput" type="search" placeholder="Search menu items…" aria-label="Search menu items">
           <button class="btn" id="clearSearchBtn" type="button">Clear</button>
@@ -505,6 +520,23 @@
     if(!item.name||!item.category){toast('Enter an item name and category.');return;}
     const idx=menu.findIndex(m=>m.id===id);if(idx>=0)menu[idx]=item;else menu.push(item);
     if(persist(KEYS.menu,menu)){clearMenuForm();renderMenu();renderMenuTable();toast('Menu saved on this device.');}
+  });
+  // Best-effort landscape lock. Android browsers may only allow this in fullscreen/installed mode.
+  async function requestLandscape() {
+    try {
+      if (screen.orientation && typeof screen.orientation.lock === 'function') {
+        await screen.orientation.lock('landscape');
+        toast('Landscape orientation enabled.');
+      } else {
+        toast('For landscape use, rotate the tablet. Orientation lock is not supported in this browser.');
+      }
+    } catch (_) {
+      toast('Rotate the tablet to landscape. For stronger locking, install/open as a web app if supported.');
+    }
+  }
+  document.addEventListener('click', e => {
+    const landscape = e.target.closest('[data-landscape]');
+    if (landscape) requestLandscape();
   });
   // Initial render
   renderMenu();renderCart();renderOrders();
