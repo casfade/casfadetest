@@ -3,27 +3,28 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#111827">
+  <meta name="theme-color" content="#172033">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <title>Waiter Mirror — Landscape Order Pad</title>
+  <title>Waiter Mirror — POS Companion</title>
   <style>
     :root {
       --bg:#f4f6f8; --panel:#fff; --ink:#172033; --muted:#687386;
       --line:#e2e7ee; --accent:#176b52; --accent-dark:#10533f;
       --soft:#e8f4ef; --danger:#b42318; --warning:#fff4d6;
-      --shadow:0 5px 20px rgba(20,35,55,.06); --radius:16px;
+      --shadow:0 2px 8px rgba(20,35,55,.06); --radius:6px;
     }
     * { box-sizing:border-box; }
-    html,body { margin:0; min-height:100%; background:var(--bg); color:var(--ink); font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
+    html,body { margin:0; min-height:100%; background:var(--bg); color:var(--ink); font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
     button,input,select,textarea { font:inherit; }
     button { cursor:pointer; }
     button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible { outline:3px solid #93c5fd; outline-offset:2px; }
     .app { max-width:1440px; margin:auto; min-height:100dvh; display:flex; flex-direction:column; }
     header { background:#111827; color:#fff; padding:14px 20px; display:flex; align-items:center; justify-content:space-between; gap:14px; position:sticky; top:0; z-index:10; box-shadow:0 4px 14px #11182720; }
-    .brand { display:flex; align-items:center; gap:11px; min-width:0; }
-    .logo { width:42px;height:42px;border-radius:13px;background:#d5f4e5;color:#155e45;display:grid;place-items:center;font-size:22px;font-weight:900;flex-shrink:0; }
+    .brand { display:flex; align-items:center; gap:11px; min-width:0; border:0; padding:0; margin:0; background:transparent; color:inherit; text-align:left; cursor:pointer; } .home-brand:hover { opacity:.92; } .home-brand:focus-visible { outline:2px solid #93c5fd; outline-offset:4px; border-radius:8px; }
+    .logo { width:42px;height:42px;border-radius:4px;background:#ffffff;display:grid;place-items:center;flex-shrink:0; }
+    .logo-placeholder { width:42px;height:42px;object-fit:contain;background:#fff;border-radius:4px;display:block;flex-shrink:0; }
     h1 { font-size:18px; line-height:1.15; margin:0; letter-spacing:-.3px; }
     .subhead { font-size:12px;color:#c4ccd8;margin-top:4px; }
     .header-actions { display:flex; align-items:center; gap:8px; }
@@ -34,43 +35,64 @@
     .eyebrow { color:var(--muted);font-size:12px;font-weight:750;text-transform:uppercase;letter-spacing:.08em; }
     .section-title { font-size:23px; letter-spacing:-.6px; margin:4px 0 0; }
     .btn { border:1px solid var(--line); background:#fff; color:var(--ink); padding:10px 13px; border-radius:11px; font-weight:700; font-size:13px; }
-    .btn:hover { background:#f8fafc; }
-    .btn.primary { background:var(--accent);color:white;border-color:var(--accent); }
-    .btn.primary:hover { background:var(--accent-dark); }
-    .btn.dark { background:#111827;color:#fff;border-color:#111827; }
+    .btn { background:#e9edf2; border-color:#d7dde6; transition:background .08s ease,transform .08s ease; }
+    .btn:active { transform:translateY(1px); background:#dce2ea; }
+    .btn:hover { background:#e0e6ed; }
+    .btn.primary { background:#172033;color:white;border-color:#172033; }
+    .btn.primary:hover { background:#2b3649; }
+    .btn.dark { background:#172033;color:#fff;border-color:#172033; }
     .btn.danger { color:var(--danger);border-color:#f1c7c3;background:#fff; }
     .btn.small { padding:7px 9px;font-size:12px; }
     .btn:disabled { opacity:.45;cursor:not-allowed; }
-    .notice { padding:12px 14px; background:var(--warning);border:1px solid #f0dca3;border-radius:12px;color:#6c5010;font-size:12px;line-height:1.45;margin-bottom:14px; }
+    .notice { padding:12px 14px; background:var(--warning);border:1px solid #f0dca3;border-radius:4px;color:#6c5010;font-size:12px;line-height:1.45;margin-bottom:14px; }
     .toolbar { display:flex; gap:9px; margin-bottom:13px; }
     .search { flex:1;min-width:0; }
-    input,select,textarea { border:1px solid #d8dee8;border-radius:10px;background:#fff;color:var(--ink);padding:11px 12px;width:100%; }
+    input,select,textarea { border:1px solid #d8dee8;border-radius:4px;background:#fff;color:var(--ink);padding:11px 12px;width:100%;min-height:42px; }
     input::placeholder,textarea::placeholder { color:#98a2b3; }
     .categories { display:flex; gap:8px; overflow:auto; padding:1px 0 12px; scrollbar-width:thin; }
-    .cat[data-color="Food"] { --cat:#dcefe9; --cat-ink:#176b52; --cat-line:#9bcdbd; }
-    .cat[data-color="Drinks"] { --cat:#dceafa; --cat-ink:#245aa6; --cat-line:#a9c7ef; }
-    .cat[data-color="Cocktails"] { --cat:#f8e0e8; --cat-ink:#a52e58; --cat-line:#e9aec2; }
-    .cat[data-color="Desserts"] { --cat:#f8edcf; --cat-ink:#8b6410; --cat-line:#e8d18c; }
-    .cat[data-color="All"] { --cat:#e8eaf0; --cat-ink:#394456; --cat-line:#c7ccd6; }
-    .cat { background:var(--cat,#fff); color:var(--cat-ink,#586275); border-color:var(--cat-line,var(--line)); }
-    .cat.active { background:var(--cat-ink,#172033); color:#fff; border-color:var(--cat-ink,#172033); }
-    .menu-item { background:var(--cat-bg,#fff); border-color:var(--cat-border,var(--line)); cursor:pointer; transition:transform .12s ease, box-shadow .12s ease; }
+    .cat[data-color="Food"] { --cat:#18785d; --cat-ink:#ffffff; --cat-line:#18785d; }
+    .cat[data-color="Drinks"] { --cat:#2866b2; --cat-ink:#ffffff; --cat-line:#2866b2; }
+    .cat[data-color="Cocktails"] { --cat:#7541a8; --cat-ink:#ffffff; --cat-line:#7541a8; }
+    .cat[data-color="Desserts"] { --cat:#b83e68; --cat-ink:#ffffff; --cat-line:#b83e68; }
+    .cat[data-color="All"] { --cat:#273246; --cat-ink:#ffffff; --cat-line:#273246; }
+    .cat { background:var(--cat,#273246); color:var(--cat-ink,#fff); border-color:var(--cat-line,var(--line)); }
+    .cat.active { box-shadow:0 0 0 3px #17203320, inset 0 -3px 0 #0002; transform:translateY(-1px); }
+    .menu-item { background:var(--cat-bg,#273246) !important; border-color:var(--cat-border,var(--line)) !important; color:#fff !important; cursor:pointer; transition:transform .08s ease, box-shadow .08s ease; display:flex !important; flex-direction:column !important; align-items:center !important; justify-content:center !important; text-align:center !important; }
     .menu-item:active { transform:scale(.985); }
     .menu-item:focus-visible { outline:3px solid #93c5fd; outline-offset:2px; }
     .menu-item .add-btn { display:none; }
     .menu-item .item-desc { display:none; }
+    .menu-item .item-name { color:#fff !important; font-size:clamp(20px,1.8vw,27px); line-height:1.18; font-weight:800; text-align:center; overflow-wrap:anywhere; width:100%; margin:auto; flex:0 0 auto; }
+    .menu-item .small-label { display:none; }
+    .menu-item .stock-label { color:#fff;background:#242b38cc;padding:6px 9px;border-radius:4px;font-size:11px;font-weight:800; position:absolute;left:8px;top:8px; }
     .table-start { display:block; }
     .table-start.hidden { display:none; }
     .ordering-workspace.hidden { display:none; }
     .table-toolbar { display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px; }
+    .table-heading-group { display:flex;align-items:center;gap:12px;flex-wrap:wrap; }
     .zone-tabs { display:flex;gap:8px;overflow:auto; }
-    .zone-tab { border:1px solid var(--line);background:#fff;border-radius:9px;padding:10px 16px;font-size:12px;font-weight:800;white-space:nowrap; }
-    .zone-tab.active { background:#1b9e9a;color:#fff;border-color:#1b9e9a; }
+    .zone-tab { border:1px solid #b8c2d1;background:#e8edf3;border-radius:4px;padding:10px 14px;font-size:12px;min-height:42px;font-weight:850;white-space:nowrap;color:#273246; }
+    .zone-tab[data-zone="Main Dining"] { background:#1b9e9a;color:#fff;border-color:#168781; }
+    .zone-tab[data-zone="Terrace"] { background:#e7dcfa;color:#59318c;border-color:#bca6e3; }
+    .zone-tab[data-zone="Outdoor"] { background:#dcefe5;color:#176b52;border-color:#a8d2bb; }
+    .zone-tab[data-zone="Takeaway"] { background:#fff0d8;color:#8a4d08;border-color:#efcb8e; }
+    .zone-tab[data-zone="Bar"] { background:#e2e8f0;color:#273246;border-color:#b9c4d3; }
+    .zone-tab.active { box-shadow:0 0 0 3px #17203322, inset 0 -3px 0 #0002; transform:translateY(-1px); }
     .legend { display:flex;gap:14px;flex-wrap:wrap;color:#596477;font-size:12px;margin:8px 0 18px; }
     .legend span { display:flex;align-items:center;gap:6px; }
+    .takeaway-toolbar { display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:0 0 14px; }
+    .takeaway-toolbar[hidden] { display:none; }
+    .table-card.takeaway-card { background:#fff0d8;color:#8a4d08;border-color:#efcb8e; }
+    .table-card.bar-card { background:#e2e8f0;color:#273246;border-color:#b9c4d3; }
+    .table-card .table-meta { margin-top:5px; }
+    .zone-tabs .zone-tab { flex:0 0 auto; }
+    .panel,.cart,.notice { border-radius:6px; }
+    .modal-actions .btn { min-width:100px; }
+    .nav-btn { border-radius:4px; }
+    .qty button { min-width:32px;min-height:32px;border-radius:4px; }
     .dot { width:9px;height:9px;border-radius:50%;display:inline-block; }
     .table-grid { display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px; }
-    .table-card { border:1px solid transparent;border-radius:15px;min-height:118px;padding:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;font-weight:800;cursor:pointer; }
+    .table-card { border:1px solid transparent;border-radius:5px;min-height:118px;padding:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;font-weight:850;cursor:pointer;font-size:18px; }
     .table-card.available { background:#dff3ef;color:#176b65;border-color:#b6e1d9; }
     .table-card.reserved { background:#fff0d8;color:#9a5a0b;border-color:#f2d3a0; }
     .table-card.occupied { background:#fde5e1;color:#a83e26;border-color:#f4c1b8; }
@@ -79,18 +101,18 @@
     .table-card .table-name { font-size:14px; }
     .table-card .table-meta { font-size:12px;font-weight:650;opacity:.85; }
     .table-card .table-action { font-size:11px;font-weight:800;opacity:.8; }
-    .cat { border:1px solid var(--line);background:#fff;color:#586275;border-radius:999px;padding:9px 14px;white-space:nowrap;font-size:13px;font-weight:700; }
+    .cat { border:1px solid var(--line);background:#fff;color:#586275;border-radius:4px;padding:10px 14px;min-height:42px;white-space:nowrap;font-size:13px;font-weight:700; }
     .cat.active { background:#172033;color:#fff;border-color:#172033; }
-    .menu-grid { display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px; }
-    .menu-item { background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px;min-height:145px;display:flex;flex-direction:column;justify-content:space-between;gap:10px;box-shadow:0 2px 5px #10182805; }
-    .menu-item.unavailable { opacity:.55; }
+    .menu-grid { display:grid;grid-template-columns:repeat(4,minmax(120px,1fr));gap:10px; }
+    .menu-item { background:var(--panel);border:1px solid var(--line);border-radius:5px;padding:12px;min-height:145px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:8px;box-shadow:0 2px 5px #10182805;position:relative; }
+    .menu-item.unavailable { opacity:.78; }
     .item-top { display:flex;justify-content:space-between;align-items:flex-start;gap:8px; }
     .item-name { font-weight:850;font-size:16px;line-height:1.2; }
     .item-desc { color:var(--muted);font-size:11px;margin-top:5px;line-height:1.3; }
     .price { font-size:17px;font-weight:900;white-space:nowrap; }
     .item-bottom { display:flex;justify-content:space-between;align-items:center;gap:8px; }
     .stock-label { font-size:10px;font-weight:800;color:#a34b11;background:#fff0df;padding:5px 7px;border-radius:6px; }
-    .add-btn { border:0;background:var(--accent);color:white;font-size:14px;font-weight:900;border-radius:10px;padding:10px 12px;min-width:68px; }
+    .add-btn { border:0;background:var(--accent);color:white;font-size:14px;font-weight:900;border-radius:4px;padding:10px 12px;min-width:68px; }
     .add-btn:disabled { background:#eef0f3;color:#9aa2af; }
     .cart { background:#fff;border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);position:sticky;top:78px;overflow:hidden; }
     .cart-head { padding:17px 17px 14px;border-bottom:1px solid var(--line); }
@@ -100,7 +122,7 @@
     .field-label { display:block;font-size:11px;font-weight:800;color:#5e6879;margin:13px 0 6px; }
     .cart-body { padding:0 17px 16px; }
     .order-type { display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:7px; }
-    .type-btn { border:1px solid var(--line);background:#fff;border-radius:9px;padding:9px 4px;font-size:11px;font-weight:800;color:#657084; }
+    .type-btn { border:1px solid var(--line);background:#fff;border-radius:4px;padding:9px 4px;min-height:40px;font-size:11px;font-weight:800;color:#657084; }
     .type-btn.active { background:#e8f4ef;color:var(--accent);border-color:#acd7c5; }
     .cart-items { padding:12px 0 4px;max-height:34vh;overflow:auto; }
     .empty { color:#8a94a4;font-size:13px;text-align:center;padding:26px 8px;line-height:1.5; }
@@ -109,7 +131,7 @@
     .cart-item-name { font-weight:800;font-size:13px;line-height:1.3; }
     .cart-item-price { color:var(--muted);font-size:12px;margin-top:4px; }
     .qty { display:flex;align-items:center;gap:7px; }
-    .qty button { width:29px;height:29px;border:1px solid var(--line);border-radius:8px;background:#fff;font-weight:800; }
+    .qty button { width:29px;height:29px;border:1px solid var(--line);border-radius:4px;background:#fff;font-weight:800; }
     .qty strong { min-width:14px;text-align:center;font-size:13px; }
     .note-input { margin-top:7px;padding:8px 9px;font-size:12px; }
     .totals { border-top:1px solid var(--line);margin-top:10px;padding-top:12px; }
@@ -138,17 +160,17 @@
     .empty-table { padding:22px;text-align:center;color:var(--muted);font-size:13px; }
     .modal-backdrop { display:none;position:fixed;inset:0;background:#0b1220a6;z-index:30;padding:18px;align-items:center;justify-content:center; }
     .modal-backdrop.open { display:flex; }
-    .modal { width:min(560px,100%);max-height:90dvh;overflow:auto;background:#fff;border-radius:18px;padding:20px;box-shadow:0 20px 60px #0004; }
+    .modal { width:min(560px,100%);max-height:90dvh;overflow:auto;background:#fff;border-radius:6px;padding:20px;box-shadow:0 20px 60px #0004; }
     .modal h2 { margin:0 0 5px;font-size:21px; }
     .modal-actions { display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;margin-top:18px; }
     .review-line { display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid #edf0f4;font-size:13px; }
     .review-line:last-child { border-bottom:0; }
-    .toast { position:fixed;bottom:18px;left:50%;transform:translate(-50%,20px);background:#111827;color:#fff;padding:12px 16px;border-radius:12px;font-size:13px;box-shadow:var(--shadow);z-index:50;opacity:0;pointer-events:none;transition:.2s;max-width:calc(100% - 24px); }
+    .toast { position:fixed;bottom:18px;left:50%;transform:translate(-50%,20px);background:#111827;color:#fff;padding:12px 16px;border-radius:4px;font-size:13px;box-shadow:var(--shadow);z-index:50;opacity:0;pointer-events:none;transition:.2s;max-width:calc(100% - 24px); }
     .toast.show { opacity:1;transform:translate(-50%,0); }
     .small-label { color:var(--muted);font-size:11px; }
     @media (max-width:1100px) {
       .layout { grid-template-columns:minmax(0,1fr) 300px;gap:10px;padding:10px; }
-      .menu-grid { grid-template-columns:repeat(3,minmax(0,1fr));gap:9px; }
+      .menu-grid { grid-template-columns:repeat(3,minmax(120px,1fr));gap:9px; }
       .menu-item { min-height:132px;padding:10px; }
     }
     @media (max-width:760px) {
@@ -178,16 +200,10 @@
 <body>
 <div class="app">
   <header>
-    <div class="brand">
-      <div class="logo">W</div>
-      <div>
-        <h1>Waiter Mirror</h1>
-        <div class="subhead">Order companion · MVP</div>
-      </div>
-    </div>
+    <button class="brand home-brand" id="homeBrandBtn" type="button" aria-label="Home — return to Tables">
+      <img class="logo-placeholder" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+j4QAAAABJRU5ErkJggg==" alt="Home">
+    </button>
     <div class="header-actions">
-      <span class="pill">LANDSCAPE · Manual POS handoff</span>
-      <button class="btn" data-landscape type="button" title="Request landscape orientation">↻ Landscape</button>
       <button class="btn" id="headerOrdersBtn" type="button">Orders <span id="orderCountHeader">0</span></button>
     </div>
   </header>
@@ -197,14 +213,17 @@
       <section class="page active" id="menuPage">
         <div class="table-start" id="tableStart">
           <div class="table-toolbar">
-            <div><div class="eyebrow">Waiter workspace</div><h2 class="section-title">Manage Tables</h2></div>
+            <div class="table-heading-group"><h2 class="section-title" id="tablesHeading">Tables</h2><button class="btn small" id="manageMenuBtn" type="button">Manage menu</button></div>
             <div class="zone-tabs" id="zoneTabs">
               <button class="zone-tab active" data-zone="Main Dining" type="button">Main Dining</button>
               <button class="zone-tab" data-zone="Terrace" type="button">Terrace</button>
               <button class="zone-tab" data-zone="Outdoor" type="button">Outdoor</button>
+              <button class="zone-tab" data-zone="Takeaway" type="button">Takeaway</button>
+              <button class="zone-tab" data-zone="Bar" type="button">Bar</button>
             </div>
           </div>
-          <div class="legend"><span><i class="dot" style="background:#7b91c8"></i> Available</span><span><i class="dot" style="background:#e0a23c"></i> Reserved</span><span><i class="dot" style="background:#d85a35"></i> On Dine</span></div>
+          <div class="legend" id="tableLegend"><span><i class="dot" style="background:#7b91c8"></i> Available</span><span><i class="dot" style="background:#e0a23c"></i> Reserved</span><span><i class="dot" style="background:#d85a35"></i> On Dine</span></div>
+          <div class="takeaway-toolbar" id="takeawayToolbar" hidden><span class="muted">Open a ticket to continue its draft, or start a new takeaway order.</span><button class="btn primary" id="newTakeawayBtn" type="button">+ New takeaway</button></div>
           <div class="table-grid" id="tableGrid"></div>
         </div>
         <div class="ordering-workspace hidden" id="orderingWorkspace">
@@ -220,18 +239,6 @@
           <div class="categories" id="categories"></div>
           <div class="menu-grid" id="menuGrid"></div>
         </div>
-      </section>
-        <div class="topline">
-          <div><div class="eyebrow">Waiter workspace</div><h2 class="section-title">Menu</h2></div>
-          <button class="btn" id="manageMenuBtn" type="button">⚙ Manage menu</button>
-        </div>
-        <div class="notice"><strong>Manual POS handoff.</strong> Build and review the order here, then enter it into your existing POS. This app does not connect to Qashier or process payments. For the intended layout, rotate the tablet to landscape; use the Landscape button to request orientation lock where supported.</div>
-        <div class="toolbar">
-          <input class="search" id="searchInput" type="search" placeholder="Search menu items…" aria-label="Search menu items">
-          <button class="btn" id="clearSearchBtn" type="button">Clear</button>
-        </div>
-        <div class="categories" id="categories"></div>
-        <div class="menu-grid" id="menuGrid"></div>
       </section>
 
       <section class="page" id="ordersPage">
@@ -310,9 +317,9 @@
   </div>
 
   <nav class="bottom-nav" aria-label="Main navigation">
-    <button class="nav-btn active" data-page="menuPage" type="button"><span>☷</span><span>Menu</span></button>
-    <button class="nav-btn" data-page="ordersPage" type="button"><span>▤</span><span>Orders</span></button>
-    <button class="nav-btn" data-page="adminPage" type="button"><span>⚙</span><span>Manage</span></button>
+    <button class="nav-btn active" data-page="menuPage" type="button"><span>Tables</span></button>
+    <button class="nav-btn" data-page="ordersPage" type="button"><span>Orders</span></button>
+    <button class="nav-btn" data-page="adminPage" type="button"><span>Manage menu</span></button>
   </nav>
 </div>
 
@@ -378,49 +385,88 @@
     window.scrollTo({top:0,behavior:'smooth'});
   }
   const CATEGORY_COLORS = {
-    Food: {bg:'#dcefe9',border:'#9bcdbd',ink:'#176b52'},
-    Drinks: {bg:'#dceafa',border:'#a9c7ef',ink:'#245aa6'},
-    Cocktails: {bg:'#f8e0e8',border:'#e9aec2',ink:'#a52e58'},
-    Desserts: {bg:'#f8edcf',border:'#e8d18c',ink:'#8b6410'},
-    All: {bg:'#e8eaf0',border:'#c7ccd6',ink:'#394456'}
+    Food: {bg:'#18785d',border:'#11654d',ink:'#ffffff'},
+    Drinks: {bg:'#2866b2',border:'#1f5596',ink:'#ffffff'},
+    Cocktails: {bg:'#7541a8',border:'#61358e',ink:'#ffffff'},
+    Desserts: {bg:'#b83e68',border:'#9e3157',ink:'#ffffff'},
+    All: {bg:'#273246',border:'#1b2434',ink:'#ffffff'}
   };
   function categoryColor(name) {
-    return CATEGORY_COLORS[name] || {bg:'#e8eaf0',border:'#c7ccd6',ink:'#394456'};
+    return CATEGORY_COLORS[name] || {bg:'#273246',border:'#1b2434',ink:'#ffffff'};
   }
   const TABLES = [
-    {id:'Table 1',zone:'Main Dining',status:'available',seats:6},
-    {id:'Table 2',zone:'Main Dining',status:'occupied',seats:2},
-    {id:'Table 3',zone:'Main Dining',status:'available',seats:2},
-    {id:'Table 4',zone:'Main Dining',status:'occupied',seats:3},
-    {id:'Table 5',zone:'Main Dining',status:'available',seats:4},
-    {id:'Table 6',zone:'Main Dining',status:'available',seats:7},
-    {id:'Table 7',zone:'Main Dining',status:'available',seats:10},
-    {id:'Table 8',zone:'Main Dining',status:'occupied',seats:2},
-    {id:'Table 9',zone:'Main Dining',status:'occupied',seats:4},
-    {id:'Terrace 1',zone:'Terrace',status:'available',seats:4},
-    {id:'Terrace 2',zone:'Terrace',status:'available',seats:2},
-    {id:'Terrace 3',zone:'Terrace',status:'reserved',seats:6},
-    {id:'Outdoor 1',zone:'Outdoor',status:'available',seats:4},
-    {id:'Outdoor 2',zone:'Outdoor',status:'available',seats:6},
-    {id:'Outdoor 3',zone:'Outdoor',status:'reserved',seats:2}
+    {id:'Table 1',zone:'Main Dining',status:'available'},
+    {id:'Table 2',zone:'Main Dining',status:'available'},
+    {id:'Table 3',zone:'Main Dining',status:'available'},
+    {id:'Table 4',zone:'Main Dining',status:'available'},
+    {id:'Table 5',zone:'Main Dining',status:'available'},
+    {id:'Table 6',zone:'Main Dining',status:'available'},
+    {id:'Table 7',zone:'Main Dining',status:'available'},
+    {id:'Table 8',zone:'Main Dining',status:'available'},
+    {id:'Table 9',zone:'Main Dining',status:'available'},
+    {id:'Terrace 1',zone:'Terrace',status:'available'},
+    {id:'Terrace 2',zone:'Terrace',status:'available'},
+    {id:'Terrace 3',zone:'Terrace',status:'available'},
+    {id:'Outdoor 1',zone:'Outdoor',status:'available'},
+    {id:'Outdoor 2',zone:'Outdoor',status:'available'},
+    {id:'Outdoor 3',zone:'Outdoor',status:'available'},
+    {id:'Bar 1',zone:'Bar',status:'available'},
+    {id:'Bar 2',zone:'Bar',status:'available'},
+    {id:'Bar 3',zone:'Bar',status:'available'},
+    {id:'Bar 4',zone:'Bar',status:'available'}
   ];
   let activeZone = 'Main Dining';
   let activeTable = '';
+  const tableDrafts = {};
+  const takeawayTickets = [];
+  let nextTakeawayNumber = 1;
+  function ensureTableOption(tableId) {
+    const select = $('tableSelect');
+    if (![...select.options].some(o=>o.value===tableId)) {
+      const option = document.createElement('option'); option.value=tableId; option.textContent=tableId; select.appendChild(option);
+    }
+    select.value = tableId;
+  }
   function renderTables() {
-    $('tableGrid').innerHTML = TABLES.filter(t=>t.zone===activeZone).map(t=>{
-      const statusLabel = t.status==='available'?'Available':t.status==='reserved'?'Reserved':'On Dine';
-      const existing = orders.find(o=>o.table===t.id && o.status!=='Handed off');
-      const currentCount = existing ? existing.items.reduce((s,i)=>s+i.qty,0) : 0;
-      return `<button class="table-card ${t.status} ${activeTable===t.id?'selected':''}" type="button" data-table="${esc(t.id)}">
-        <span class="table-icon">▤</span><span class="table-name">${esc(t.id)}</span>
-        <span class="table-meta">${existing ? currentCount+' items · '+statusLabel : statusLabel+' · '+t.seats+' seats'}</span>
-        <span class="table-action">${t.status==='reserved'?'View reservation':existing?'Continue order':'Select table'} →</span>
-      </button>`;
-    }).join('');
+    const takeaway = activeZone === 'Takeaway';
+    $('tablesHeading').textContent = takeaway ? 'Takeaway tickets' : activeZone === 'Bar' ? 'Bar positions' : 'Tables';
+    $('takeawayToolbar').hidden = !takeaway;
+    $('tableLegend').hidden = takeaway || activeZone === 'Bar';
+    if (takeaway) {
+      $('tableGrid').innerHTML = takeawayTickets.length ? takeawayTickets.map(id=>`
+        <button class="table-card takeaway-card ${activeTable===id?'selected':''}" type="button" data-table="${esc(id)}">
+          <span class="table-name">${esc(id)}</span><span class="table-meta">${tableDrafts[id]?.cart?.length ? `${tableDrafts[id].cart.reduce((n,i)=>n+i.qty,0)} items · ${money(tableDrafts[id].cart.reduce((n,i)=>n+i.qty*i.price,0))}` : 'Empty ticket'}</span><span class="table-action">Open ticket</span>
+        </button>`).join('') : '<div class="empty-table">No active takeaway tickets. Start a new ticket when ready.</div>';
+      return;
+    }
+    $('tableGrid').innerHTML = TABLES.filter(t=>t.zone===activeZone).map(t=>`
+      <button class="table-card available ${activeZone==='Bar'?'bar-card':''} ${activeTable===t.id?'selected':''}" type="button" data-table="${esc(t.id)}">
+        <span class="table-name">${esc(t.id)}</span>
+      </button>`).join('');
+  }
+  function createTakeawayTicket() {
+    const id = `Takeaway ${nextTakeawayNumber++}`;
+    takeawayTickets.push(id);
+    tableDrafts[id] = {cart:[],note:'',orderType:'Takeaway'};
+    renderTables();
+    chooseTable(id);
   }
   function chooseTable(tableId) {
+    if (activeTable) {
+      tableDrafts[activeTable] = {
+        cart: cart.map(item=>({...item})),
+        note: $('orderNote').value,
+        orderType
+      };
+    }
     activeTable = tableId;
-    $('tableSelect').value = tableId;
+    const saved = tableDrafts[tableId];
+    cart = saved ? saved.cart.map(item=>({...item})) : [];
+    $('orderNote').value = saved ? saved.note : '';
+    orderType = saved ? saved.orderType : (tableId.startsWith('Takeaway ') ? 'Takeaway' : tableId.startsWith('Bar ') ? 'Bar' : 'Dine-in');
+    document.querySelectorAll('.type-btn').forEach(b=>b.classList.toggle('active',b.dataset.type===orderType));
+    ensureTableOption(tableId);
+    renderCart();
     $('tableStart').classList.add('hidden');
     $('orderingWorkspace').classList.remove('hidden');
     $('cartPanel').style.display = '';
@@ -430,6 +476,9 @@
     renderTables();
   }
   function returnToTables() {
+    if (activeTable) {
+      tableDrafts[activeTable] = {cart:cart.map(item=>({...item})),note:$('orderNote').value,orderType};
+    }
     $('orderingWorkspace').classList.add('hidden');
     $('tableStart').classList.remove('hidden');
     $('cartPanel').style.display = 'none';
@@ -445,9 +494,9 @@
     const q = $('searchInput').value.trim().toLowerCase();
     const visible = menu.filter(m => (category === 'All' || m.category === category) && (!q || `${m.name} ${m.category} ${m.description||''}`.toLowerCase().includes(q)));
     $('menuGrid').innerHTML = visible.length ? visible.map(m => `
-      <button class="menu-item ${m.available?'':'unavailable'}" type="button" data-add="${esc(m.id)}" data-menu-category="${esc(m.category)}" style="--cat-bg:${categoryColor(m.category).bg};--cat-border:${categoryColor(m.category).border}" ${m.available?'':'disabled'} aria-label="${esc(m.name)}${m.available?', add to order':', sold out'}">
+      <button class="menu-item ${m.available?'':'unavailable'} category-${esc(m.category).toLowerCase().replace(/[^a-z0-9]+/g,'-')}" type="button" data-add="${esc(m.id)}" data-menu-category="${esc(m.category)}" style="--cat-bg:${categoryColor(m.category).bg};--cat-border:${categoryColor(m.category).border}" ${m.available?'':'disabled'} aria-label="${esc(m.name)}${m.available?', add to order':', sold out'}">
         <div class="item-name">${esc(m.name)}</div>
-        ${m.available ? '<span class="small-label">Tap to add</span>' : '<span class="stock-label">SOLD OUT</span>'}
+        ${m.available ? '' : '<span class="stock-label">SOLD OUT</span>'}
       </button>`).join('') : '<div class="empty">No menu items found.</div>';
   }
   function cartCount() { return cart.reduce((sum,item)=>sum+item.qty,0); }
@@ -471,7 +520,7 @@
     if (!item || !item.available) return;
     const found = cart.find(c=>c.id===id);
     if (found) found.qty++; else cart.push({id:item.id,name:item.name,price:Number(item.price),qty:1,note:''});
-    renderCart(); toast(`${item.name} added`);
+    renderCart();
   }
   function resetCart() {
     cart=[]; $('orderNote').value=''; $('tableSelect').value='';
@@ -508,7 +557,12 @@
     const o=buildOrder(); if(!o) return;
     orders.unshift(o);
     if(persist(KEYS.orders,orders)) {
-      renderCart(); renderOrders(); toast('Draft saved on this device.');
+      if (activeTable) {
+        delete tableDrafts[activeTable];
+        if(activeTable.startsWith('Takeaway ')) { const i=takeawayTickets.indexOf(activeTable); if(i>=0) takeawayTickets.splice(i,1); }
+      }
+      activeTable=''; resetCart(); renderOrders();
+      $('orderingWorkspace').classList.add('hidden');$('tableStart').classList.remove('hidden');$('cartPanel').style.display='none';renderTables();toast('Draft saved.');
       return o;
     }
     orders.shift(); return null;
@@ -588,7 +642,8 @@
   }
 
   document.addEventListener('click',e=>{
-    const table=e.target.closest('[data-table]');if(table){const selected=TABLES.find(t=>t.id===table.dataset.table);if(selected&&selected.status==='reserved'&&!confirm('This table is marked reserved. Continue to its order screen?'))return;activeZone=selected?selected.zone:activeZone;chooseTable(table.dataset.table);}
+    const newTakeaway=e.target.closest('#newTakeawayBtn');if(newTakeaway){createTakeawayTicket();return;}
+    const table=e.target.closest('[data-table]');if(table){const selected=TABLES.find(t=>t.id===table.dataset.table);if(selected)activeZone=selected.zone;else if(table.dataset.table.startsWith('Takeaway '))activeZone='Takeaway';document.querySelectorAll('.zone-tab').forEach(b=>b.classList.toggle('active',b.dataset.zone===activeZone));chooseTable(table.dataset.table);}
     const zone=e.target.closest('[data-zone]');if(zone){activeZone=zone.dataset.zone;document.querySelectorAll('.zone-tab').forEach(b=>b.classList.toggle('active',b.dataset.zone===activeZone));renderTables();}
     const add=e.target.closest('[data-add]');if(add)addItem(add.dataset.add);
     const cat=e.target.closest('[data-category]');if(cat){category=cat.dataset.category;renderMenu();}
@@ -614,13 +669,24 @@
     if(!o)return;
     // Keep the reviewed snapshot; saving is local only and never submits to a POS.
     orders.unshift(o);
-    if(persist(KEYS.orders,orders)){ $('reviewModal').classList.remove('open');resetCart();renderOrders();toast('Order draft saved on this device.');}
-    else orders.shift();
+    if(persist(KEYS.orders,orders)){
+      if(activeTable) {
+        delete tableDrafts[activeTable];
+        if(activeTable.startsWith('Takeaway ')) { const i=takeawayTickets.indexOf(activeTable); if(i>=0) takeawayTickets.splice(i,1); }
+      }
+      activeTable=''; $('reviewModal').classList.remove('open');resetCart();renderOrders();
+      $('orderingWorkspace').classList.add('hidden');$('tableStart').classList.remove('hidden');$('cartPanel').style.display='none';renderTables();toast('Draft saved.');
+    } else orders.shift();
   });
   $('copyOrderBtn').addEventListener('click',()=>{try{const o=JSON.parse($('reviewModal').dataset.order||'null');if(o)copyText(orderText(o));}catch(_){}});
   $('reviewModal').addEventListener('click',e=>{if(e.target===$('reviewModal'))$('reviewModal').classList.remove('open');});
-  $('manageMenuBtn').addEventListener('click',()=>showPage('adminPage'));
+  $('homeBrandBtn').addEventListener('click',()=>{
+    if (cart.length > 0 && !confirm('You have items in this order. Return to Tables and keep this draft?')) return;
+    returnToTables();
+    showPage('menuPage');
+  });
   $('backToTablesBtn').addEventListener('click',returnToTables);
+  $('manageMenuBtn').addEventListener('click',()=>showPage('adminPage'));
   $('backToMenuBtn').addEventListener('click',()=>showPage('menuPage'));
   $('headerOrdersBtn').addEventListener('click',()=>showPage('ordersPage'));
   $('exportOrdersBtn').addEventListener('click',exportOrders);
@@ -638,25 +704,10 @@
     const idx=menu.findIndex(m=>m.id===id);if(idx>=0)menu[idx]=item;else menu.push(item);
     if(persist(KEYS.menu,menu)){clearMenuForm();renderMenu();renderMenuTable();toast('Menu saved on this device.');}
   });
-  // Best-effort landscape lock. Android browsers may only allow this in fullscreen/installed mode.
-  async function requestLandscape() {
-    try {
-      if (screen.orientation && typeof screen.orientation.lock === 'function') {
-        await screen.orientation.lock('landscape');
-        toast('Landscape orientation enabled.');
-      } else {
-        toast('For landscape use, rotate the tablet. Orientation lock is not supported in this browser.');
-      }
-    } catch (_) {
-      toast('Rotate the tablet to landscape. For stronger locking, install/open as a web app if supported.');
-    }
-  }
-  document.addEventListener('click', e => {
-    const landscape = e.target.closest('[data-landscape]');
-    if (landscape) requestLandscape();
-  });
   // Initial render
   $('cartPanel').style.display = 'none';
+  $('tableStart').classList.remove('hidden');
+  $('orderingWorkspace').classList.add('hidden');
   renderMenu();renderCart();renderOrders();renderTables();
 })();
 </script>
